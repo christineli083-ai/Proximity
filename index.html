@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proximity | Spatial Immune Profiling for Melanoma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1117;
+    --bg-panel:#141b26;
+    --bg-panel-raised:#1b2432;
+    --line:#26303f;
+    --ink:#e9edf2;
+    --ink-dim:#9aa4b2;
+    --ink-faint:#5f6b7a;
+    --teal:#3FE0D0;
+    --magma-1:#ff9d4d;
+    --magma-2:#ff5f6d;
+    --purple:#8f7bff;
+    --good:#4ade80;
+    --warn:#facc15;
+    --bad:#f87171;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif; line-height:1.6;
+    font-size:16px;
+  }
+  h1,h2,h3{font-family:'Spectral', serif; font-weight:600; margin:0 0 .4em;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--teal);}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+  section{padding:88px 0;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--teal); display:inline-block;}
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:50; backdrop-filter:blur(10px);
+    background:rgba(13,17,23,.86); border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:16px 28px;}
+  .brand{font-family:'Spectral', serif; font-weight:700; font-size:19px; letter-spacing:.01em;}
+  .brand span{color:var(--teal);}
+  nav ul{list-style:none; display:flex; gap:28px; margin:0; padding:0;}
+  nav a{color:var(--ink-dim); text-decoration:none; font-size:14px; font-family:'IBM Plex Mono',monospace;}
+  nav a:hover{color:var(--teal);}
+
+  /* HERO */
+  .hero{padding:64px 0 40px;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center;}
+  .hero h1{font-size:44px; line-height:1.12; margin-bottom:20px;}
+  .hero h1 em{font-style:italic; color:var(--teal);}
+  .hero p.lede{color:var(--ink-dim); font-size:17px; max-width:46ch;}
+  .hero-stats{display:flex; gap:32px; margin-top:34px; flex-wrap:wrap;}
+  .stat .n{font-family:'IBM Plex Mono',monospace; font-size:26px; color:var(--teal); font-weight:600;}
+  .stat .l{font-size:12.5px; color:var(--ink-faint); margin-top:2px;}
+  .hero-visual{position:relative;}
+  .hero-visual img{width:100%; border-radius:var(--radius); border:1px solid var(--line); display:block;}
+  .hero-visual .cap{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-faint); margin-top:10px;}
+  .badge-row{display:flex; gap:10px; margin-top:18px;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:5px 10px;
+    border:1px solid var(--line); border-radius:999px; color:var(--ink-dim);
+  }
+
+  .disclaimer{
+    margin-top:40px; padding:14px 18px; border:1px solid var(--line); border-left:3px solid var(--magma-1);
+    border-radius:6px; background:var(--bg-panel); font-size:13.5px; color:var(--ink-dim);
+  }
+  .disclaimer strong{color:var(--ink);}
+
+  /* SECTION HEADERS */
+  .sec-head{max-width:640px; margin-bottom:44px;}
+  .sec-head h2{font-size:30px;}
+  .sec-head p{color:var(--ink-dim); font-size:15.5px;}
+
+  /* ITN */
+  .itn-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .itn-card{background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px;}
+  .itn-card .tag{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--magma-1); letter-spacing:.08em; text-transform:uppercase;}
+  .itn-card h3{font-size:19px; margin:8px 0 10px;}
+  .itn-card p{font-size:14.5px; color:var(--ink-dim); margin:0;}
+
+  /* CASE EXPLORER */
+  .case-explorer{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:32px; display:grid; grid-template-columns:1fr 1fr; gap:32px;}
+  .case-tabs{display:flex; gap:8px; margin-bottom:22px;}
+  .case-tab{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:9px 14px; border-radius:7px;
+    border:1px solid var(--line); background:var(--bg-panel-raised); color:var(--ink-dim); cursor:pointer;
+    transition:all .15s ease;
+  }
+  .case-tab.active{border-color:var(--teal); color:var(--teal); background:rgba(63,224,208,.08);}
+  .case-img img{width:100%; border-radius:8px; border:1px solid var(--line); display:block;}
+  .case-readout h3{font-size:15px; font-family:'IBM Plex Mono',monospace; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px;}
+  .status-pill{display:inline-block; padding:6px 14px; border-radius:999px; font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; margin-bottom:16px;}
+  .status-Infiltrated{background:rgba(74,222,128,.12); color:var(--good); border:1px solid rgba(74,222,128,.3);}
+  .status-Intermediate{background:rgba(250,204,21,.12); color:var(--warn); border:1px solid rgba(250,204,21,.3);}
+  .status-Excluded{background:rgba(248,113,113,.12); color:var(--bad); border:1px solid rgba(248,113,113,.3);}
+  .metric-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:14.5px;}
+  .metric-row span:first-child{color:var(--ink-faint);}
+  .metric-row span:last-child{font-family:'IBM Plex Mono',monospace; color:var(--ink);}
+  .rec-box{margin-top:18px; padding:14px 16px; background:var(--bg-panel-raised); border-radius:8px; border-left:3px solid var(--purple); font-size:14px; color:var(--ink-dim);}
+  .flag{color:var(--bad); font-weight:600;}
+
+  /* MATH */
+  .math-block{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; align-items:start;}
+  .math-card{background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px;}
+  .math-card h3{font-size:17px; margin-bottom:10px;}
+  .math-card p{font-size:14.5px; color:var(--ink-dim);}
+  .formula{
+    font-family:'IBM Plex Mono',monospace; background:var(--bg-panel-raised); border:1px solid var(--line);
+    border-radius:6px; padding:12px 14px; font-size:13.5px; color:var(--teal); margin:12px 0; overflow-x:auto;
+  }
+  .full-img{width:100%; border-radius:var(--radius); border:1px solid var(--line); margin:20px 0 8px;}
+  .cap{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint);}
+  .result-strip{display:flex; gap:0; background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-top:20px;}
+  .result-strip div{flex:1; padding:20px; text-align:center; border-right:1px solid var(--line);}
+  .result-strip div:last-child{border-right:none;}
+  .result-strip .n{font-family:'IBM Plex Mono',monospace; font-size:22px; color:var(--teal);}
+  .result-strip .l{font-size:12px; color:var(--ink-faint); margin-top:4px;}
+
+  /* TABLES */
+  table{width:100%; border-collapse:collapse; font-size:14.5px; margin-top:8px;}
+  th{text-align:left; font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); padding:10px 12px; border-bottom:1px solid var(--line);}
+  td{padding:12px; border-bottom:1px solid var(--line); color:var(--ink-dim);}
+  tr:last-child td{border-bottom:none;}
+  td.hl{color:var(--ink); font-family:'IBM Plex Mono',monospace;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:40px;}
+  ul.clean{padding-left:18px; margin:10px 0; color:var(--ink-dim); font-size:14.5px;}
+  ul.clean li{margin-bottom:8px;}
+
+  .limitations-list{display:grid; gap:14px;}
+  .limit-item{display:flex; gap:14px; padding:16px; background:var(--bg-panel); border-radius:8px; border:1px solid var(--line);}
+  .limit-item .num{font-family:'IBM Plex Mono',monospace; color:var(--magma-1); font-size:13px; flex-shrink:0;}
+  .limit-item p{margin:0; font-size:14.5px; color:var(--ink-dim);}
+
+  footer{border-top:1px solid var(--line); padding:48px 0; text-align:center; color:var(--ink-faint); font-size:13.5px;}
+  footer a{color:var(--ink-dim); margin:0 10px; text-decoration:none;}
+
+  @media (max-width: 860px){
+    .hero-grid, .case-explorer, .math-block, .two-col{grid-template-columns:1fr;}
+    .itn-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:32px;}
+    nav ul{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">Proximity<span>.</span></div>
+    <ul>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#tool">The Tool</a></li>
+      <li><a href="#math">Method</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#limitations">Limitations</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">HIMPact Hacks '26 — Global Health</div>
+      <h1>Where the T-cells stand<br>matters more than<br><em>how many</em> there are.</h1>
+      <p class="lede">Proximity quantifies the spatial distance between CD8+ cytotoxic T-cells and malignant melanocytes in melanoma tissue — turning a spatial pattern pathologists eyeball into a number oncologists can act on.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="n">r = 0.53</div><div class="l">NN distance ↔ Breslow depth<br>(p &lt; 0.0001, n = 60)</div></div>
+        <div class="stat"><div class="n">&lt; 2s</div><div class="l">per-case compute time<br>(KD-tree nearest neighbour)</div></div>
+        <div class="stat"><div class="n">50 μm</div><div class="l">literature-derived functional<br>engagement threshold</div></div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">Python · SciPy · KD-Tree</span>
+        <span class="badge">Rule-based, auditable logic</span>
+        <span class="badge">Open source</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img src="assets/case_excluded.png" alt="Density heatmap of CD8+ T-cell exclusion around melanoma tumor cells">
+      <div class="cap">Fig. — CD8+ T-cell density (heat) around a melanocyte tumor mass (teal), immune-excluded case. Synthetic data, see Method.</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="disclaimer">
+      <strong>What this is, plainly:</strong> a weekend proof-of-concept built on literature-grounded <em>synthetic</em> spatial data, not validated on real patient biopsies. Every number on this page is either a synthetic-data result or an explicit modeling assumption — both are labeled as such throughout. See <a href="#limitations">Limitations</a>.
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Why this problem</div>
+      <h2>Immune cell count isn't the same as immune cell reach.</h2>
+      <p>Traditional pathology reports how many CD8+ T-cells are present in a tumor sample. But a T-cell 300 μm from the nearest tumor cell, walled off by cancer-associated fibroblasts, cannot kill that cell — proximity, not just presence, determines whether the immune system can actually engage the tumor.</p>
+    </div>
+    <div class="itn-grid">
+      <div class="itn-card">
+        <div class="tag">Importance</div>
+        <h3>A leading cause of skin-cancer death</h3>
+        <p>Melanoma causes the large majority of skin-cancer deaths despite being a minority of skin-cancer cases, and immunotherapy response varies widely — much of that variance is currently invisible to standard cell-count pathology.</p>
+      </div>
+      <div class="itn-card">
+        <div class="tag">Tractability</div>
+        <h3>The imaging exists — the analysis layer doesn't</h3>
+        <p>Multiplexed immunofluorescence (mIF) imaging is already produced in research and increasingly clinical pipelines. Nearest-neighbour spatial statistics are well-established math (Diggle's G-function) — what's missing is a fast, interpretable layer that turns coordinates into a clinician-facing readout.</p>
+      </div>
+      <div class="itn-card">
+        <div class="tag">Neglectedness</div>
+        <h3>Spatial tools exist, actionable ones don't</h3>
+        <p>Research tools like Squidpy compute spatial statistics for computational biologists. Few translate that output into a plain, auditable recommendation a practicing oncologist can use without a bioinformatics background.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tool" style="background:var(--bg-panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The tool</div>
+      <h2>Three case types, one auditable readout.</h2>
+      <p>Every case is classified using explicit, literature-anchored thresholds — not a black-box model. A physician can see exactly why a case was flagged.</p>
+    </div>
+
+    <div class="case-explorer">
+      <div>
+        <div class="case-tabs">
+          <div class="case-tab active" data-case="infiltrated">Infiltrated</div>
+          <div class="case-tab" data-case="intermediate">Intermediate</div>
+          <div class="case-tab" data-case="excluded">Excluded</div>
+        </div>
+        <div class="case-img">
+          <img id="case-image" src="assets/case_infiltrated.png" alt="Case density heatmap">
+        </div>
+      </div>
+      <div class="case-readout">
+        <h3>Spatial Immune Readout</h3>
+        <span id="status-pill" class="status-pill status-Infiltrated">Immune-Infiltrated</span>
+        <div class="metric-row"><span>Mean NN distance</span><span id="m-nn">26.9 μm</span></div>
+        <div class="metric-row"><span>Std. dev of NN distance</span><span id="m-std">30.8 μm</span></div>
+        <div class="metric-row"><span>Median NN distance</span><span id="m-median">16.2 μm</span></div>
+        <div class="metric-row"><span>% T-cells &gt; 50μm excluded</span><span id="m-pct">11.7%</span></div>
+        <div class="metric-row"><span>Breslow depth</span><span id="m-breslow">1.29 mm</span></div>
+        <div class="rec-box" id="rec-box">No additional flag from spatial immune profiling; interpret alongside standard staging.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="math">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The math</div>
+      <h2>What the tool is actually computing.</h2>
+      <p>Every step below is one sentence of math, deliberately — auditability is a feature, not a limitation.</p>
+    </div>
+
+    <div class="math-block">
+      <div class="math-card">
+        <h3>1. Nearest-neighbour distance</h3>
+        <p>For every CD8+ T-cell, find the Euclidean distance to the closest malignant melanocyte. This is the classic point-pattern "G-function" nearest-neighbour statistic (Diggle, 2003).</p>
+        <div class="formula">d(T<sub>i</sub>) = min<sub>j</sub> ‖T<sub>i</sub> − M<sub>j</sub>‖₂</div>
+        <p>Computed with a KD-tree (SciPy <span class="mono">cKDTree</span>) for O(n log n) queries instead of an O(n·m) brute-force loop over every T-cell/melanocyte pair.</p>
+      </div>
+      <div class="math-card">
+        <h3>2. Standard deviation of NN distance</h3>
+        <p>The mean tells you typical proximity; the standard deviation tells you consistency. Two tumors can share a mean but differ sharply in whether exclusion is uniform or patchy.</p>
+        <div class="formula">σ = √( Σ(d<sub>i</sub> − d̄)² / n )</div>
+        <p>A high σ alongside a moderate mean often signals a mixed tumor — some regions infiltrated, others walled off — which a single average would hide.</p>
+      </div>
+    </div>
+
+    <div class="math-card" style="margin-bottom:24px;">
+      <h3>3. Density vs. distribution</h3>
+      <p><strong>Distribution</strong> is where the points are — the raw scatter. <strong>Density</strong> is how concentrated they are in a given area — a smoothed 2D histogram. Two tumors can have T-cells spread across the same footprint (same distribution) but with very different local clustering (different density) — that difference is invisible in a scatter plot and only shows up as a heatmap.</p>
+      <img class="full-img" src="assets/distribution_comparison.png" alt="Distribution comparison of thin vs thick tumors">
+      <div class="cap">Fig. — Raw point distribution: thin-tumor T-cells sit close to the tumor edge; thick-tumor T-cells are pushed outward.</div>
+      <img class="full-img" src="assets/density_heatmap.png" alt="Density heatmap comparison">
+      <div class="cap">Fig. — Same two cases as a density heatmap: exclusion is visible as a dark ring around the tumor mass in the thick-tumor case.</div>
+    </div>
+
+    <div class="math-card">
+      <h3>4. Correlation with clinical variables</h3>
+      <p>Per-patient mean NN distance is correlated against Breslow depth (Pearson r, with Spearman's ρ reported as a non-parametric robustness check given the right-skewed Breslow distribution) and against the simulated survival outcome.</p>
+      <img class="full-img" src="assets/correlation_summary.png" alt="Correlation summary plots">
+      <div class="cap">Fig. — Left: NN distance rises with Breslow depth. Right: NN distance by simulated 5-year survival outcome.</div>
+      <div class="result-strip">
+        <div><div class="n">r = 0.53</div><div class="l">NN vs. Breslow depth<br>p = 1.1 × 10⁻⁵</div></div>
+        <div><div class="n">ρ = 0.49</div><div class="l">Spearman robustness check<br>p = 8.2 × 10⁻⁵</div></div>
+        <div><div class="n">r = −0.10</div><div class="l">NN vs. survival<br>p = 0.44 (not significant)</div></div>
+      </div>
+      <p style="margin-top:16px;">The Breslow-depth correlation is strong and significant even on synthetic data with realistic per-patient noise. The survival correlation is directionally consistent with the hypothesis but <strong>not statistically significant at n = 60</strong> — an honest result, not a hidden one; real spatial-immune cohorts typically run 100+ patients for exactly this reason. See Limitations.</p>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" style="background:var(--bg-panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Path to clinic</div>
+      <h2>Getting from prototype to physician's desk.</h2>
+      <p>This is a directional map, not legal or regulatory advice — every real deployment would need counsel from a regulatory affairs specialist and an accredited pathology partner.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="font-size:18px;">Implementation & regulatory timeline</h3>
+        <table>
+          <tr><th>Phase</th><th>Milestone</th><th>Est. timeline</th></tr>
+          <tr><td class="hl">0</td><td>Retrospective validation on a real HTAN/TCGA-SKCM cohort with known Breslow depth &amp; survival</td><td>3–6 mo</td></tr>
+          <tr><td class="hl">1</td><td>Multi-site concordance study vs. pathologist manual scoring</td><td>6–12 mo</td></tr>
+          <tr><td class="hl">2</td><td>SaMD (Software as a Medical Device) risk classification &amp; pre-submission meeting (FDA) / classification under IVDR (EU)</td><td>3–6 mo</td></tr>
+          <tr><td class="hl">3</td><td>Clinical validation study sized for regulatory submission</td><td>12–18 mo</td></tr>
+          <tr><td class="hl">4</td><td>510(k) / De Novo submission (US) or IVDR technical file (EU)</td><td>6–12 mo review</td></tr>
+          <tr><td class="hl">5</td><td>Post-market surveillance &amp; real-world performance monitoring</td><td>ongoing</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:18px;">Illustrative financial projections</h3>
+        <table>
+          <tr><th>Year</th><th>Focus</th><th>Est. revenue</th></tr>
+          <tr><td class="hl">Y1</td><td>Research-use-only licensing to academic pathology labs</td><td class="hl">$0–15K</td></tr>
+          <tr><td class="hl">Y2</td><td>Pilot deployments, grant-funded validation studies</td><td class="hl">$15K–75K</td></tr>
+          <tr><td class="hl">Y3</td><td>Post-clearance, per-case SaaS licensing to pathology labs</td><td class="hl">$150K–500K</td></tr>
+        </table>
+        <p style="font-size:13.5px; color:var(--ink-faint); margin-top:12px;">Figures are directional planning estimates for a pre-revenue research tool, not a funded projection. Revenue model: per-case or per-seat SaaS licensing to pathology labs, comparable to existing digital pathology analytics tools.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;">
+      <h3 style="font-size:18px;">Where this goes next</h3>
+      <ul class="clean">
+        <li>Extend beyond CD8+/melanocyte pairs to a multi-cell-type spatial graph (Tregs, TAMs, CAFs) for a fuller immune-exclusion picture.</li>
+        <li>Validate the 50 μm engagement threshold empirically rather than adopting it directly from the literature.</li>
+        <li>Integrate with QuPath's cell-segmentation output so the pipeline can run directly on raw mIF slides, not pre-extracted coordinates.</li>
+        <li>Extend the same spatial framework to other solid tumors where T-cell exclusion is prognostically relevant (e.g. pancreatic, colorectal).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="limitations">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Honesty check</div>
+      <h2>What this isn't, yet.</h2>
+    </div>
+    <div class="limitations-list">
+      <div class="limit-item"><span class="num">01</span><p><strong>Synthetic, not real, patient data.</strong> Cell coordinates and outcomes were generated from a literature-grounded simulation, not extracted from real HTAN/TCGA-SKCM biopsies. Correlation strength on real data will differ.</p></div>
+      <div class="limit-item"><span class="num">02</span><p><strong>The survival relationship is weak and not significant here (p = 0.44).</strong> Reported transparently rather than tuned away — a real validation cohort with more patients and longer follow-up is needed before this metric could inform survival prediction.</p></div>
+      <div class="limit-item"><span class="num">03</span><p><strong>The 50 μm threshold is drawn from the literature review, not independently validated</strong> against outcomes in this dataset or any real cohort.</p></div>
+      <div class="limit-item"><span class="num">04</span><p><strong>No cell segmentation step.</strong> The pipeline assumes pre-extracted cell coordinates and types; it does not yet handle raw microscopy images (that requires QuPath or equivalent segmentation, out of scope for this weekend).</p></div>
+      <div class="limit-item"><span class="num">05</span><p><strong>Two cell types only.</strong> Real melanoma TME involves CAFs, TAMs, Tregs, and more (see literature review) — this tool isolates one interaction for tractability, not because it's the whole picture.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Built for HIMPact Hacks '26 — High Impact Mathematicians</div>
+    <div style="margin-top:12px;">
+      <a href="#">GitHub — website</a> · <a href="#">GitHub — analysis tool</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const cases = {
+  infiltrated: {
+    img: "assets/case_infiltrated.png",
+    status: "Immune-Infiltrated",
+    statusClass: "status-Infiltrated",
+    nn: "26.9 μm", std: "30.8 μm", median: "16.2 μm", pct: "11.7%", breslow: "1.29 mm",
+    rec: "No additional flag from spatial immune profiling; interpret alongside standard staging."
+  },
+  intermediate: {
+    img: "assets/case_intermediate.png",
+    status: "Intermediate",
+    statusClass: "status-Intermediate",
+    nn: "44.7 μm", std: "40.1 μm", median: "28.0 μm", pct: "32.5%", breslow: "1.54 mm",
+    rec: "No additional flag from spatial immune profiling; interpret alongside standard staging."
+  },
+  excluded: {
+    img: "assets/case_excluded.png",
+    status: "Immune-Excluded",
+    statusClass: "status-Excluded",
+    nn: "232.9 μm", std: "83.3 μm", median: "225.5 μm", pct: "99.2%", breslow: "4.23 mm",
+    rec: "⚑ High-risk combination: consider immunotherapy-sensitizing strategies or closer follow-up interval — immune-excluded phenotype + increased Breslow depth is associated with poorer outcomes in this analysis."
+  }
+};
+
+document.querySelectorAll(".case-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".case-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const c = cases[tab.dataset.case];
+    document.getElementById("case-image").src = c.img;
+    const pill = document.getElementById("status-pill");
+    pill.textContent = c.status;
+    pill.className = "status-pill " + c.statusClass;
+    document.getElementById("m-nn").textContent = c.nn;
+    document.getElementById("m-std").textContent = c.std;
+    document.getElementById("m-median").textContent = c.median;
+    document.getElementById("m-pct").textContent = c.pct;
+    document.getElementById("m-breslow").textContent = c.breslow;
+    const recBox = document.getElementById("rec-box");
+    recBox.textContent = c.rec;
+    recBox.style.borderLeftColor = c.status === "Immune-Excluded" ? "#f87171" : "#8f7bff";
+  });
+});
+</script>
+
+</body>
+</html>
